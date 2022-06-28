@@ -11,6 +11,7 @@ export class AccountService {
   baseUrl = 'https://localhost:5001/api/';
   private currentUserSource = new ReplaySubject<User | null>(1);
   currentUser$ = this.currentUserSource.asObservable();
+  isLoggedIn$: boolean = false;
 
   constructor(private http: HttpClient) { }
 
@@ -21,6 +22,7 @@ export class AccountService {
         if (user) {
           localStorage.setItem('user', JSON.stringify(user));
           this.currentUserSource.next(user);
+          this.isLoggedIn$ = true;
         }
       })
     );
@@ -40,10 +42,20 @@ export class AccountService {
 
   setCurrentUser(user: User) {
     this.currentUserSource.next(user);
+    
+    this.currentUser$.subscribe(data => {
+      if (data?.userName===undefined){
+        this.isLoggedIn$ = false;
+      }
+      else{
+        this.isLoggedIn$ = true;
+      }
+    });
   }
 
   logout() {
     localStorage.removeItem('user');
     this.currentUserSource.next(null);
+    this.isLoggedIn$ = false;
   }
 }
