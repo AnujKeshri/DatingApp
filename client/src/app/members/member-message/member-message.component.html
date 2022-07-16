@@ -16,7 +16,7 @@
                     <div class="header">
                         <small class="text-muted">
                             <span class="fa fa-clock-o">
-                                {{item.messageSend | timeago}}
+                                {{item.messageSent | timeago}}
                             </span>
                             <span class="text-danger" *ngIf="!item.dateRead && item.senderUsername !== username">
                                 (unread)

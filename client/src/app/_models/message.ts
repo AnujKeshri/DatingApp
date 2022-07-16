@@ -8,5 +8,5 @@ export interface IMessage {
     recipientPhotoUrl: string;
     content: string;
     dateRead?: Date;
-    messageSend: Date;
+    messageSent: Date;
 }
