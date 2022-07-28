@@ -4,6 +4,7 @@ import { ReplaySubject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { User } from '../_models/user';
+import { PresenceService } from './presence.service';
 
 @Injectable({
   providedIn: 'root'
@@ -14,7 +15,7 @@ export class AccountService {
   currentUser$ = this.currentUserSource.asObservable();
   isLoggedIn$: boolean = false;
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private presenceService: PresenceService) { }
 
   login(model: any) {
     return this.http.post<User>(this.baseUrl + 'account/login', model).pipe(
@@ -22,6 +23,7 @@ export class AccountService {
         const user = response;
         if (user) {
           this.setCurrentUser(user);
+          this.presenceService.createHubConnection(user);
         }
       })
     );
@@ -33,6 +35,7 @@ export class AccountService {
         const user = response;
         if (user) {
           this.setCurrentUser(user);
+          this.presenceService.createHubConnection(user);
         }
       })
     );
@@ -40,10 +43,13 @@ export class AccountService {
 
   setCurrentUser(user: User) {
     user.roles = [];
-    const roles = this.getDecodedToken(user.token).role;
-    Array.isArray(roles) ? user.roles = roles : user.roles.push(roles);
+    if ('userName' in user) {
+      const roles = this.getDecodedToken(user.token).role;
+      Array.isArray(roles) ? user.roles = roles : user.roles.push(roles);
+    }
     localStorage.setItem('user', JSON.stringify(user));
     this.currentUserSource.next(user);
+
 
     this.currentUser$.subscribe(data => {
       if (data?.userName === undefined) {
@@ -59,6 +65,7 @@ export class AccountService {
     localStorage.removeItem('user');
     this.currentUserSource.next(null!);
     this.isLoggedIn$ = false;
+    this.presenceService.stopHubConnection();
   }
 
   getDecodedToken(token: string) {

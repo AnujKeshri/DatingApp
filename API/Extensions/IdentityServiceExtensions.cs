@@ -31,6 +31,21 @@ namespace API.Extensions
                     ValidateIssuer = false,
                     ValidateAudience = false,
                 };
+
+                //signalR token validation
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var accessToke = context.Request.Query["access_token"];
+                        var path = context.HttpContext.Request.Path;
+                        if (!string.IsNullOrEmpty(accessToke) && path.StartsWithSegments("/hubs"))
+                        {
+                            context.Token = accessToke;
+                        }
+                        return Task.CompletedTask;
+                    }
+                };
             });
 
             services.AddAuthorization(opt =>
