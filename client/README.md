@@ -25,3 +25,7 @@ Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To u
 ## Further help
 
 To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+
+
+create postgress using docker : 
+docker run --name dev -e POSTGRES_USER=appuser -e POSTGRES_PASSWORD=sa@1234 -p5432:5432 -d postgres:latest
